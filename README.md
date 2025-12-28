@@ -4,8 +4,12 @@ Aplicação web CRUD desenvolvida com Flask e MySQL, utilizando banco de dados e
 
 O sistema permite cadastrar, listar, atualizar e excluir alunos, com persistência de dados em banco de dados remoto e conexão segura.
 
-## 🔗 Aplicação online:
+## 🌐 Link da aplicação em produção:
 https://apl-web-flash-crud.onrender.com
+⚠️ Observação
+Por utilizar o plano gratuito da Render, o primeiro acesso pode levar cerca de 10 a 30 segundos para a inicialização do serviço (cold start).
+Após esse período, a aplicação funciona normalmente.
+
 
 ## 🖼️ Demonstração
 <p align="center"> <img src="Python_Crud.JPG" width="700"/> <br><br> <img src="Python_Crud1.JPG" width="700"/> </p>
