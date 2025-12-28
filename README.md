@@ -3,7 +3,11 @@
 Aplicação web CRUD desenvolvida com **Flask** e **MySQL**, utilizando banco de dados gerenciado na **Aiven** e deploy na **Render**.
 
 O sistema permite **cadastrar, listar, atualizar e excluir alunos**, com persistência de dados em nuvem.
+Aplicação publicada na Render:
 
+🔗 https://apl-web-flash-crud.onrender.com
+
+Banco de dados hospedado na Aiven Cloud com acesso controlado por IP.
 ---
 
 ## 🚀 Tecnologias Utilizadas
