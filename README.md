@@ -1,44 +1,39 @@
-# <div align="center">Aplicativo CRUD em Python Flask</div>
+# Apl_Web_Flash_CRUD
 
-## Exemplo de um aplicativo web CRUD usando Python, Flask e MySQL. CRUD significa Criar, Ler, Atualizar e Excluir registros.
+Aplicação web CRUD desenvolvida com **Flask** e **MySQL**, utilizando banco de dados gerenciado na **Aiven** e deploy na **Render**.
 
-Este aplicativo permite:
+O sistema permite **cadastrar, listar, atualizar e excluir alunos**, com persistência de dados em nuvem.
 
-Adicionar novos alunos;
+---
 
-Visualizar registros existentes;
+## 🚀 Tecnologias Utilizadas
 
-Atualizar informações de alunos;
+- Python 3
+- Flask
+- PyMySQL
+- MySQL (Aiven Cloud)
+- HTML + CSS
+- Gunicorn
+- Render (Deploy)
 
-Excluir registros.
+---
 
-# O código contém comentários explicativos para facilitar o aprendizado e entendimento do funcionamento do aplicativo.
+## ⚙️ Funcionalidades
 
-## Tecnologias utilizadas
+- ✅ Listagem de alunos
+- ➕ Cadastro de novos alunos
+- ✏️ Atualização de dados
+- ❌ Exclusão de registros
+- 🔒 Conexão segura com MySQL (SSL)
 
-Back-end: Python com Flask
+---
 
-Front-end: HTML, CSS e Bootstrap
+## 🗄️ Estrutura da Tabela
 
-Banco de dados: MySQL
-
-# Como executar
-
-## Instale as dependências:
-
-pip install Flask
-
-
-## Execute o aplicativo:
-
-python app.py
-
-
-## Acesse a interface no navegador:
-
-https://localhost:5000/
-
-# Pré-visualização
-
-![screenshot](Python_Crud.JPG)
-![screenshot](Python_Crud1.JPG)
+```sql
+CREATE TABLE students (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    phone VARCHAR(20) NOT NULL
+);
