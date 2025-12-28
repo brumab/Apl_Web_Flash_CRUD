@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 
 pymysql.install_as_MySQLdb()
 
-# 🔑 Carregar variáveis de ambiente
 load_dotenv()
 
 app = Flask(__name__)
@@ -20,15 +19,13 @@ app.config['MYSQL_USER'] = os.getenv('MYSQL_USER')
 app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD')
 app.config['MYSQL_DB'] = os.getenv('MYSQL_DB')
 app.config['MYSQL_PORT'] = int(os.getenv('MYSQL_PORT'))
-
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 app.config['MYSQL_SSL'] = {'ssl': {}}
-
 
 mysql = MySQL(app)
 
 # =========================
-# Inicialização segura do banco (Flask 3)
+# Inicialização segura (Flask 3)
 # =========================
 db_initialized = False
 
@@ -44,7 +41,6 @@ def create_table():
     """)
     mysql.connection.commit()
     cur.close()
-    print("Tabela students pronta")
 
 @app.before_request
 def init_db():
