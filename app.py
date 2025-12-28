@@ -1,9 +1,13 @@
 import pymysql
-from flask import Flask, render_template, request, redirect, url_for
 import os
+from flask import Flask, render_template, request, redirect, url_for, flash
 
 app = Flask(__name__)
+app.secret_key = "flashcrud123"
 
+# =========================
+# Conexão MySQL (Aiven)
+# =========================
 def get_db_connection():
     return pymysql.connect(
         host=os.getenv("MYSQL_HOST"),
@@ -14,15 +18,14 @@ def get_db_connection():
         cursorclass=pymysql.cursors.DictCursor
     )
 
-mysql = MySQL(app)
-
 # =========================
-# Inicialização segura (Flask 3)
+# Inicialização do banco
 # =========================
 db_initialized = False
 
 def create_table():
-    cur = mysql.connection.cursor()
+    conn = get_db_connection()
+    cur = conn.cursor()
     cur.execute("""
         CREATE TABLE IF NOT EXISTS students (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -31,8 +34,9 @@ def create_table():
             phone VARCHAR(20) NOT NULL
         )
     """)
-    mysql.connection.commit()
+    conn.commit()
     cur.close()
+    conn.close()
 
 @app.before_request
 def init_db():
@@ -50,56 +54,66 @@ def init_db():
 @app.route("/test-db")
 def test_db():
     try:
-        cur = mysql.connection.cursor()
+        conn = get_db_connection()
+        cur = conn.cursor()
         cur.execute("SELECT 1")
         cur.close()
+        conn.close()
         return "✅ Conectado ao MySQL Aiven com sucesso"
     except Exception as e:
         return f"❌ Erro MySQL: {e}"
 
-@app.route('/')
+@app.route("/")
 def index():
-    cur = mysql.connection.cursor()
+    conn = get_db_connection()
+    cur = conn.cursor()
     cur.execute("SELECT * FROM students ORDER BY id DESC")
     students = cur.fetchall()
     cur.close()
-    return render_template('index.html', students=students)
+    conn.close()
+    return render_template("index.html", students=students)
 
-@app.route('/inserir', methods=['POST'])
+@app.route("/inserir", methods=["POST"])
 def inserir():
-    cur = mysql.connection.cursor()
+    conn = get_db_connection()
+    cur = conn.cursor()
     cur.execute(
         "INSERT INTO students (name, email, phone) VALUES (%s, %s, %s)",
-        (request.form['name'], request.form['email'], request.form['phone'])
+        (request.form["name"], request.form["email"], request.form["phone"])
     )
-    mysql.connection.commit()
+    conn.commit()
     cur.close()
+    conn.close()
     flash("Aluno cadastrado com sucesso!")
-    return redirect(url_for('index'))
+    return redirect(url_for("index"))
 
-@app.route('/atualizar', methods=['POST'])
+@app.route("/atualizar", methods=["POST"])
 def atualizar():
-    cur = mysql.connection.cursor()
+    conn = get_db_connection()
+    cur = conn.cursor()
     cur.execute("""
         UPDATE students
         SET name=%s, email=%s, phone=%s
         WHERE id=%s
     """, (
-        request.form['name'],
-        request.form['email'],
-        request.form['phone'],
-        request.form['id']
+        request.form["name"],
+        request.form["email"],
+        request.form["phone"],
+        request.form["id"]
     ))
-    mysql.connection.commit()
+    conn.commit()
     cur.close()
+    conn.close()
     flash("Aluno atualizado com sucesso!")
-    return redirect(url_for('index'))
+    return redirect(url_for("index"))
 
-@app.route('/excluir/<int:id_dado>', methods=['POST'])
+@app.route("/excluir/<int:id_dado>", methods=["POST"])
 def excluir(id_dado):
-    cur = mysql.connection.cursor()
+    conn = get_db_connection()
+    cur = conn.cursor()
     cur.execute("DELETE FROM students WHERE id=%s", (id_dado,))
-    mysql.connection.commit()
+    conn.commit()
     cur.close()
+    conn.close()
     flash("Aluno excluído com sucesso!")
-    return redirect(url_for('index'))
+    return redirect(url_for("index"))
