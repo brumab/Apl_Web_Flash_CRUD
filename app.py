@@ -3,9 +3,13 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_mysqldb import MySQL
 from dotenv import load_dotenv
 
+# 🔑 Carrega variáveis de ambiente
+load_dotenv()
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "flash-crud-secret")
 
+# 🔗 Config MySQL (AIVEN)
 app.config['MYSQL_HOST'] = os.environ.get("MYSQL_HOST")
 app.config['MYSQL_USER'] = os.environ.get("MYSQL_USER")
 app.config['MYSQL_PASSWORD'] = os.environ.get("MYSQL_PASSWORD")
@@ -13,17 +17,13 @@ app.config['MYSQL_DB'] = os.environ.get("MYSQL_DB")
 app.config['MYSQL_PORT'] = int(os.environ.get("MYSQL_PORT", 3306))
 app.config['MYSQL_CURSORCLASS'] = "DictCursor"
 
-# SSL só se a variável existir (Render / Aiven)
-if os.environ.get("MYSQL_SSL") == "true":
-    app.config['MYSQL_SSL'] = {"ssl": {}}
-
-
+# 🔐 SSL obrigatório no Aiven
+app.config['MYSQL_SSL'] = {"ssl": {}}
 
 mysql = MySQL(app)
 
-
 # =========================
-# 🔒 Inicialização segura do banco (Flask 3.x)
+# Inicialização do banco
 # =========================
 db_initialized = False
 
@@ -39,26 +39,23 @@ def create_table():
     """)
     mysql.connection.commit()
     cur.close()
-    print("Tabela students pronta")
 
-@app.before_request
+@app.before_first_request
 def init_db():
     global db_initialized
     if not db_initialized:
-        try:
-            create_table()
-            db_initialized = True
-        except Exception as e:
-            print("Erro ao inicializar banco:", e)
+        create_table()
+        db_initialized = True
 
 # =========================
-# 📌 ROTAS
+# Rotas
 # =========================
 @app.route("/test-db")
 def test_db():
     try:
-        conn = mysql.connection
-        return "✅ Conectado ao MySQL com sucesso"
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT 1")
+        return "✅ Conectado ao MySQL Aiven com sucesso"
     except Exception as e:
         return f"❌ Erro MySQL: {e}"
 
@@ -108,9 +105,3 @@ def excluir(id_dado):
     cur.close()
     flash("Aluno excluído com sucesso!")
     return redirect(url_for('index'))
-
-# =========================
-# 🚀 Local only
-# =========================
-if __name__ == "__main__":
-    app.run(debug=True)
