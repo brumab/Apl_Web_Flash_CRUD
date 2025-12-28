@@ -3,13 +3,15 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_mysqldb import MySQL
 from dotenv import load_dotenv
 
-# 🔑 Carrega variáveis de ambiente
+# 🔑 Carregar variáveis de ambiente
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "flash-crud-secret")
 
-# 🔗 Config MySQL (AIVEN)
+# =========================
+# MySQL - AIVEN
+# =========================
 app.config['MYSQL_HOST'] = os.environ.get("MYSQL_HOST")
 app.config['MYSQL_USER'] = os.environ.get("MYSQL_USER")
 app.config['MYSQL_PASSWORD'] = os.environ.get("MYSQL_PASSWORD")
@@ -23,7 +25,7 @@ app.config['MYSQL_SSL'] = {"ssl": {}}
 mysql = MySQL(app)
 
 # =========================
-# Inicialização do banco
+# Inicialização segura do banco (Flask 3)
 # =========================
 db_initialized = False
 
@@ -39,13 +41,17 @@ def create_table():
     """)
     mysql.connection.commit()
     cur.close()
+    print("Tabela students pronta")
 
-@app.before_first_request
+@app.before_request
 def init_db():
     global db_initialized
     if not db_initialized:
-        create_table()
-        db_initialized = True
+        try:
+            create_table()
+            db_initialized = True
+        except Exception as e:
+            print("Erro ao inicializar banco:", e)
 
 # =========================
 # Rotas
