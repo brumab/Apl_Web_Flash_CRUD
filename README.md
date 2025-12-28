@@ -9,8 +9,8 @@ Aplicação publicada na Render:
 
 <br>
 <p align="center">
-  <img src="assets\images\Python_Crud.JPG"/>
-  <img src="assets\images\Python_Crud1.JPG/>
+  Python_Crud.JPG
+  Python_Crud1.JPG
 </p>
 <br>
 
