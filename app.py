@@ -1,36 +1,27 @@
 import os
 import pymysql
 from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_mysqldb import MySQL
 from dotenv import load_dotenv
-
-pymysql.install_as_MySQLdb()
 
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "flash-crud-secret")
+app.secret_key = os.getenv("SECRET_KEY", "flash-crud-secret")
 
-# =========================
-# MySQL - AIVEN
-# =========================
-app.config['MYSQL_HOST'] = os.getenv('MYSQL_HOST')
-app.config['MYSQL_USER'] = os.getenv('MYSQL_USER')
-app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD')
-app.config['MYSQL_DB'] = os.getenv('MYSQL_DB')
-app.config['MYSQL_PORT'] = int(os.getenv('MYSQL_PORT'))
-app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
-app.config['MYSQL_SSL'] = {'ssl': {}}
-
-mysql = MySQL(app)
-
-# =========================
-# Inicialização segura (Flask 3)
-# =========================
-db_initialized = False
+def get_connection():
+    return pymysql.connect(
+        host=os.getenv("MYSQL_HOST"),
+        user=os.getenv("MYSQL_USER"),
+        password=os.getenv("MYSQL_PASSWORD"),
+        database=os.getenv("MYSQL_DB"),
+        port=int(os.getenv("MYSQL_PORT")),
+        cursorclass=pymysql.cursors.DictCursor,
+        ssl={"ssl": {}}  # Aiven exige SSL
+    )
 
 def create_table():
-    cur = mysql.connection.cursor()
+    conn = get_connection()
+    cur = conn.cursor()
     cur.execute("""
         CREATE TABLE IF NOT EXISTS students (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -39,54 +30,54 @@ def create_table():
             phone VARCHAR(20) NOT NULL
         )
     """)
-    mysql.connection.commit()
+    conn.commit()
     cur.close()
+    conn.close()
 
-@app.before_request
+@app.before_first_request
 def init_db():
-    global db_initialized
-    if not db_initialized:
-        try:
-            create_table()
-            db_initialized = True
-        except Exception as e:
-            print("Erro ao inicializar banco:", e)
+    create_table()
 
-# =========================
-# Rotas
-# =========================
 @app.route("/test-db")
 def test_db():
     try:
-        cur = mysql.connection.cursor()
+        conn = get_connection()
+        cur = conn.cursor()
         cur.execute("SELECT 1")
+        cur.close()
+        conn.close()
         return "✅ Conectado ao MySQL Aiven com sucesso"
     except Exception as e:
         return f"❌ Erro MySQL: {e}"
 
 @app.route('/')
 def index():
-    cur = mysql.connection.cursor()
+    conn = get_connection()
+    cur = conn.cursor()
     cur.execute("SELECT * FROM students ORDER BY id DESC")
     students = cur.fetchall()
     cur.close()
+    conn.close()
     return render_template('index.html', students=students)
 
 @app.route('/inserir', methods=['POST'])
 def inserir():
-    cur = mysql.connection.cursor()
+    conn = get_connection()
+    cur = conn.cursor()
     cur.execute(
         "INSERT INTO students (name, email, phone) VALUES (%s, %s, %s)",
         (request.form['name'], request.form['email'], request.form['phone'])
     )
-    mysql.connection.commit()
+    conn.commit()
     cur.close()
+    conn.close()
     flash("Aluno cadastrado com sucesso!")
     return redirect(url_for('index'))
 
 @app.route('/atualizar', methods=['POST'])
 def atualizar():
-    cur = mysql.connection.cursor()
+    conn = get_connection()
+    cur = conn.cursor()
     cur.execute("""
         UPDATE students
         SET name=%s, email=%s, phone=%s
@@ -97,16 +88,19 @@ def atualizar():
         request.form['phone'],
         request.form['id']
     ))
-    mysql.connection.commit()
+    conn.commit()
     cur.close()
+    conn.close()
     flash("Aluno atualizado com sucesso!")
     return redirect(url_for('index'))
 
 @app.route('/excluir/<int:id_dado>', methods=['POST'])
 def excluir(id_dado):
-    cur = mysql.connection.cursor()
+    conn = get_connection()
+    cur = conn.cursor()
     cur.execute("DELETE FROM students WHERE id=%s", (id_dado,))
-    mysql.connection.commit()
+    conn.commit()
     cur.close()
+    conn.close()
     flash("Aluno excluído com sucesso!")
     return redirect(url_for('index'))
