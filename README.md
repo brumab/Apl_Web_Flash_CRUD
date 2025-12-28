@@ -7,6 +7,13 @@ Aplicação publicada na Render:
 
 🔗 https://apl-web-flash-crud.onrender.com
 
+<br>
+<p align="center">
+  <img src="assets\images\Python_Crud.JPG"/>
+  <img src="assets\images\Python_Crud1.JPG/>
+</p>
+<br>
+
 Banco de dados hospedado na Aiven Cloud com acesso controlado por IP.
 ---
 
